@@ -2,8 +2,11 @@
 name = "captif-data-structures"
 version = "0.1"
 description = ""
-authors = ["John Bull <john.bull@nzta.govt.nz>"]
+authors = ["John Bull"]
+homepage = "https://github.com/captif-nz/captif-data-structures"
 license = "MIT"
+readme = "README.md"
+keywords = ["CAPTIF"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
