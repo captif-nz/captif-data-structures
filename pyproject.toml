@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "captif-data-schema"
+name = "captif-data-structures"
 version = "0.1"
 description = ""
 authors = ["John Bull <john.bull@nzta.govt.nz>"]
@@ -9,7 +9,6 @@ license = "MIT"
 python = "^3.9"
 pandas = "^1.3.3"
 parse = "^1.19.0"
-tableschema = "^1.20.2"
 pydantic = "^1.8.2"
 
 [tool.poetry.dev-dependencies]
