@@ -58,3 +58,7 @@ class DeflectionBeamReader(BaseReader):
 
 class LapCountReader(BaseReader):
     parent_structure = structure.LapCountDataStructure
+
+
+class TextureReader(BaseReader):
+    parent_structure = structure.TextureDataStructure

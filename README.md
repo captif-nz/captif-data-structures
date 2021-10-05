@@ -9,5 +9,6 @@ CAPTIF facility:
 
 Instruments:
  - deflection beam
+ - stationary laser profilometer (SLP)
 
 Examples of the data structures currently supported can be found in `./tests/data`.
