@@ -1,6 +1,6 @@
 
 from datetime import date, datetime, time
-from typing import Any, Optional
+from typing import Any, List, Optional
 from pydantic import BaseModel, validator
 
 from .base import BaseDataStructure
@@ -46,8 +46,9 @@ class TextureDataStructure(BaseDataStructure):
         new parameters optional or specify default values.
 
         """
-        date: date
-        file_number: int
+        date: Optional[date]
+        file_number: Optional[int]
+        sample_spacing_mm: Optional[float]
 
         @validator("date", pre=True)
         def parse_date(cls, value):
@@ -133,8 +134,27 @@ class _245ff223(TextureDataStructure):
         def parse_relative_height_mm(cls, value):
             return None if value == "NaN" else value
 
-    @staticmethod
-    def row_preprocessor(row: dict) -> dict:
-        del(row["point_no"])
-        return row
 
+class _7cd12dee(TextureDataStructure):
+    data_structure = (
+        "profile_name: {}\n"
+        "sample_spacing_mm: {sample_spacing_mm}\n"
+        "{}"
+        "\n"
+    )
+
+    class row_model(BaseModel):
+        """
+        Table row Pydantic model.
+        """
+        relative_height_mm: Optional[float]
+
+        @validator("relative_height_mm", pre=True)
+        def parse_relative_height_mm(cls, value):
+            return None if value == "NaN" else value
+
+    @staticmethod
+    def table_preprocessor(table_rows: List[dict], meta: dict = {}) -> List[dict]:
+        for ii, _ in enumerate(table_rows):
+            table_rows[ii]["distance_mm"] = ii * meta.get("sample_spacing_mm")
+        return table_rows

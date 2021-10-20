@@ -29,8 +29,10 @@ class BaseReader:
             meta = structure.extract_meta(data)
             if meta is None:
                 continue
-            table_rows = structure.extract_table(data)
+            meta = cls.parent_structure.validate_meta(meta)
+            table_rows = structure.extract_table(data, meta)
             if table_rows is not None:
+                table_rows = cls.parent_structure.validate_table(table_rows)
                 break
 
         # Raise DataStructureError if unable to parse:
@@ -41,11 +43,7 @@ class BaseReader:
                 f"(see 'captif_data_structure.structure')"
             )
 
-        return (
-            cls.parent_structure.validate_meta(meta),
-            cls.parent_structure.validate_table(table_rows),
-            structure.id,
-        )
+        return (meta, table_rows, structure.id)
 
 
 class DemoReader(BaseReader):

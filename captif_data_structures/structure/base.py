@@ -1,4 +1,5 @@
 
+from typing import List, Optional
 from parse import parse
 from pydantic import BaseModel, ValidationError
 
@@ -44,8 +45,25 @@ class BaseDataStructure:
         in to the table row format of the parent data structure. A common use case is
         combining "date" and "time" meta data fields into a single "datetime" field, 
         converting units or deleting unused columns.
+
+        For more complex preprocessing requiring knowledge of all rows and meta data use
+        the `table_preprocessor` method.
         """
         return row
+
+    @staticmethod
+    def table_preprocessor(table_rows: List[dict], meta: dict = {}) -> List[dict]:
+        """
+        Table preprocessor.
+
+        This method is used as a final step before the table rows are validated against
+        the table row format of the parent data structure. It is called after the
+        `row_preprocessor` method and performs a similar function execpt that the method
+        has access to all table rows and any meta data. A common use case is to add an
+        sample spacing column, which requires knowledge of both the sample rate (which
+        can be passed in as meta data) and the total number of readings.
+        """
+        return table_rows
 
     @classmethod
     def extract_meta(cls, data: str) -> dict:
@@ -62,7 +80,7 @@ class BaseDataStructure:
         return cls.meta_preprocessor(parsed.named)
 
     @classmethod
-    def extract_table(cls, data: str) -> dict:
+    def extract_table(cls, data: str, meta: Optional[dict] = None) -> dict:
         """
         Extract the table rows from the data string.
 
@@ -85,15 +103,18 @@ class BaseDataStructure:
         except ValidationError:
             return None  # return None if unable to validate table rows
 
-        # Run the table rows through row_preprocessor and return:
-        return [cls.row_preprocessor(row) for row in table_rows]
+        # Run the table rows through row_preprocessor:
+        table_rows = [cls.row_preprocessor(row) for row in table_rows]
+
+        # Run the table rows through table_preprocessor and return:
+        return cls.table_preprocessor(table_rows, meta)
 
     @classmethod
     def validate_meta(cls, meta):
         """
         Validate the meta data using meta_model.
         """
-        return cls.meta_model(**meta).dict()
+        return cls.meta_model(**meta).dict(exclude_unset=True)
 
     @classmethod
     def validate_table(cls, table_rows):

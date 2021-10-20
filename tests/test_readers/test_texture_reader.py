@@ -38,3 +38,17 @@ def test_texture_reader_245ff223(data_path):
         {"distance_mm": 0.075, "relative_height_mm": -2.090},
     ]
     assert structure_id == "245ff223"
+
+
+def test_texture_reader_7cd12dee(data_path):
+    path = data_path.joinpath("texture", "7cd12dee.dat")
+    meta, table_rows, structure_id = TextureReader.load(path)
+
+    assert meta == {"sample_spacing_mm": 1.0}
+    assert table_rows == [
+        {"distance_mm": 0, "relative_height_mm": -7.406126},
+        {"distance_mm": 1.0, "relative_height_mm": -7.214107},
+        {"distance_mm": 2.0, "relative_height_mm": -7.239000},
+        {"distance_mm": 3.0, "relative_height_mm": -7.295854},
+    ]
+    assert structure_id == "7cd12dee"
