@@ -1,7 +1,10 @@
 
+import psutil
+import os
 import numpy as np
 from typing import List, Optional
 from parse import parse
+from platform import system
 from pydantic import BaseModel, ValidationError
 from unsync import unsync
 from multiprocessing import cpu_count
@@ -10,6 +13,7 @@ from ..helpers import tab_to_comma
 
 
 CPU_COUNT = cpu_count()
+OS = system()
 
 
 class BaseDataStructure:
@@ -163,11 +167,21 @@ def unpack_results(tasks):
     return [rr for tt in tasks for rr in tt.result()]
 
 
+def limit_cpu():
+    p = psutil.Process(os.getpid())
+    if OS == "Windows":
+        p.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS)
+    else:
+        p.nice(19)
+
+
 @unsync(cpu_bound=True)
 def call_row_model(row_model, rows, exclude_unset=False):
+    limit_cpu()
     return [row_model(**row).dict(exclude_unset=exclude_unset) for row in rows]
 
 
 @unsync(cpu_bound=True)
 def call_row_preprocessor(row_preprocessor, rows):
+    limit_cpu()
     return [row_preprocessor(row) for row in rows]
