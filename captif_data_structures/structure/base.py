@@ -1,9 +1,15 @@
 
+import numpy as np
 from typing import List, Optional
 from parse import parse
 from pydantic import BaseModel, ValidationError
+from unsync import unsync
+from multiprocessing import cpu_count
 
 from ..helpers import tab_to_comma
+
+
+CPU_COUNT = cpu_count()
 
 
 class BaseDataStructure:
@@ -99,12 +105,21 @@ class BaseDataStructure:
         # Attempt to validate table rows using the row_model. This will attempt to cast
         # any fields that don't match the corresponding row_model field.
         try:
-            table_rows = [cls.row_model(**row).dict() for row in table_rows]
+            tasks = [
+                call_row_model(cls.row_model, rows.tolist())
+                for rows in np.array_split(table_rows, CPU_COUNT)
+            ]
+            table_rows = unpack_results(tasks)
         except ValidationError:
             return None  # return None if unable to validate table rows
 
         # Run the table rows through row_preprocessor:
-        table_rows = [cls.row_preprocessor(row) for row in table_rows]
+
+        tasks = [
+            call_row_preprocessor(cls.row_preprocessor, rows.tolist())
+            for rows in np.array_split(table_rows, CPU_COUNT)
+        ]
+        table_rows = unpack_results(tasks)
 
         # Run the table rows through table_preprocessor and return:
         return cls.table_preprocessor(table_rows, meta)
@@ -121,7 +136,11 @@ class BaseDataStructure:
         """
         Validate the table rows using row_model.
         """
-        return [cls.row_model(**row).dict(exclude_unset=True) for row in table_rows]
+        tasks = [
+            call_row_model(cls.row_model, rows.tolist(), True)
+            for rows in np.array_split(table_rows, CPU_COUNT)
+        ]
+        return [rr for tt in tasks for rr in tt.result()]
 
     @classmethod
     @property
@@ -138,3 +157,17 @@ class BaseDataStructure:
         Data structure ID.
         """
         return cls.__name__.split("_")[-1]
+
+
+def unpack_results(tasks):
+    return [rr for tt in tasks for rr in tt.result()]
+
+
+@unsync(cpu_bound=True)
+def call_row_model(row_model, rows, exclude_unset=False):
+    return [row_model(**row).dict(exclude_unset=exclude_unset) for row in rows]
+
+
+@unsync(cpu_bound=True)
+def call_row_preprocessor(row_preprocessor, rows):
+    return [row_preprocessor(row) for row in rows]
