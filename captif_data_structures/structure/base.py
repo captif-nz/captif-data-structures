@@ -111,7 +111,7 @@ class BaseDataStructure:
         # Attempt to validate table rows using the row_model. This will attempt to cast
         # any fields that don't match the corresponding row_model field.
         try:
-            table_rows = validate_table_rows(cls.row_model, table_rows, parallel)
+            table_rows = validate_table_rows(cls.row_model, table_rows, parallel=parallel)
         except ValidationError:
             return None  # return None if unable to validate table rows
 
