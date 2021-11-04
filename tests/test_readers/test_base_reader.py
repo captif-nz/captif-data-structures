@@ -27,3 +27,15 @@ def test_demo_load(data_path):
         {"column_1": "suzuki_", "column_2": 0},
     ]
     assert structure_id == "abcd1234"
+
+
+def test_demo_load_serial(data_path):
+    path = data_path.joinpath("demo", "abcd1234.dat")
+    meta, table_rows, structure_id = DemoReader.load(path, parallel=False)
+    assert meta == {"param_1": "tuesday", "param_2": 33.1}
+    assert table_rows == [
+        {"column_1": "toyota_", "column_2": 2},
+        {"column_1": "nissan_", "column_2": 33},
+        {"column_1": "suzuki_", "column_2": 0},
+    ]
+    assert structure_id == "abcd1234"

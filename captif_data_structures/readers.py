@@ -21,7 +21,7 @@ class BaseReader:
         return data
 
     @classmethod
-    def load(cls, path: Union[str, Path]):
+    def load(cls, path: Union[str, Path], parallel: bool = True):
         data = cls._read_data_from_file(path)
 
         # Loop over all data structure subclasses and attempt to parse data:
@@ -30,9 +30,9 @@ class BaseReader:
             if meta is None:
                 continue
             meta = cls.parent_structure.validate_meta(meta)
-            table_rows = structure.extract_table(data, meta)
+            table_rows = structure.extract_table(data, meta, parallel)
             if table_rows is not None:
-                table_rows = cls.parent_structure.validate_table(table_rows)
+                table_rows = cls.parent_structure.validate_table(table_rows, parallel)
                 break
 
         # Raise DataStructureError if unable to parse:

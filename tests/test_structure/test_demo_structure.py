@@ -40,3 +40,22 @@ def test_demo_extract_table():
         {"column_1": "nissan_", "column_2": 33},
         {"column_1": "suzuki_", "column_2": 0},
     ]
+
+
+def test_demo_extract_table_serial():
+    data = (
+        "param1\ttuesday\n"
+        "param2\t23.1\n"
+        "param3\t1.4\n"
+        "\n"
+        "column B\tcolumn A\n"
+        "toyota\t3\n"
+        "nissan\t34\n"
+        "suzuki\t1"
+    )
+    table_rows = _abcd1234.extract_table(data, parallel=False)
+    assert table_rows == [
+        {"column_1": "toyota_", "column_2": 2},
+        {"column_1": "nissan_", "column_2": 33},
+        {"column_1": "suzuki_", "column_2": 0},
+    ]

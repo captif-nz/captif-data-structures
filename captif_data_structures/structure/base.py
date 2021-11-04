@@ -90,7 +90,9 @@ class BaseDataStructure:
         return cls.meta_preprocessor(parsed.named)
 
     @classmethod
-    def extract_table(cls, data: str, meta: Optional[dict] = None) -> dict:
+    def extract_table(
+        cls, data: str, meta: Optional[dict] = None, parallel: bool = True,
+    ) -> dict:
         """
         Extract the table rows from the data string.
 
@@ -109,21 +111,12 @@ class BaseDataStructure:
         # Attempt to validate table rows using the row_model. This will attempt to cast
         # any fields that don't match the corresponding row_model field.
         try:
-            tasks = [
-                call_row_model(cls.row_model, rows.tolist())
-                for rows in np.array_split(table_rows, CPU_COUNT)
-            ]
-            table_rows = unpack_results(tasks)
+            table_rows = validate_table_rows(cls.row_model, table_rows, parallel)
         except ValidationError:
             return None  # return None if unable to validate table rows
 
         # Run the table rows through row_preprocessor:
-
-        tasks = [
-            call_row_preprocessor(cls.row_preprocessor, rows.tolist())
-            for rows in np.array_split(table_rows, CPU_COUNT)
-        ]
-        table_rows = unpack_results(tasks)
+        table_rows = preprocess_table_rows(cls.row_preprocessor, table_rows, parallel)
 
         # Run the table rows through table_preprocessor and return:
         return cls.table_preprocessor(table_rows, meta)
@@ -136,15 +129,13 @@ class BaseDataStructure:
         return cls.meta_model(**meta).dict(exclude_unset=True)
 
     @classmethod
-    def validate_table(cls, table_rows):
+    def validate_table(cls, table_rows, parallel=True):
         """
         Validate the table rows using row_model.
         """
-        tasks = [
-            call_row_model(cls.row_model, rows.tolist(), True)
-            for rows in np.array_split(table_rows, CPU_COUNT)
-        ]
-        return [rr for tt in tasks for rr in tt.result()]
+        return validate_table_rows(
+            cls.row_model, table_rows, exclude_unset=True, parallel=parallel,
+        )
 
     @classmethod
     @property
@@ -185,3 +176,23 @@ def call_row_model(row_model, rows, exclude_unset=False):
 def call_row_preprocessor(row_preprocessor, rows):
     limit_cpu()
     return [row_preprocessor(row) for row in rows]
+
+
+def validate_table_rows(row_model, table_rows, exclude_unset=False, parallel=True):
+    if parallel:
+        tasks = [
+            call_row_model(row_model, rows.tolist(), exclude_unset)
+            for rows in np.array_split(table_rows, CPU_COUNT)
+        ]
+        return unpack_results(tasks)
+    return [row_model(**row).dict(exclude_unset=exclude_unset) for row in table_rows]
+
+
+def preprocess_table_rows(row_preprocessor, table_rows, parallel=True):
+    if parallel:
+        tasks = [
+            call_row_preprocessor(row_preprocessor, rows.tolist())
+            for rows in np.array_split(table_rows, CPU_COUNT)
+        ]
+        return unpack_results(tasks)
+    return [row_preprocessor(row) for row in table_rows]
