@@ -3,4 +3,4 @@ import captif_data_structures
 
 
 def test_version():
-    assert captif_data_structures.__version__ == "0.9"
+    assert captif_data_structures.__version__ == "0.10"
