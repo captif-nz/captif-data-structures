@@ -1,5 +1,5 @@
 
-from datetime import date, datetime
+from datetime import date
 
 from captif_data_structures.readers import TextureReader
 
@@ -52,3 +52,19 @@ def test_texture_reader_7cd12dee(data_path):
         {"distance_mm": 3.0, "relative_height_mm": -7.295854},
     ]
     assert structure_id == "7cd12dee"
+
+
+def test_texture_reader_0319aee1(data_path):
+    path = data_path.joinpath("texture", "0319aee1.dat")
+    meta, table_rows, structure_id = TextureReader.load(path)
+
+    assert meta == {
+        "date": date(2021, 10, 22),
+        "file_number": 0,
+    }
+    assert table_rows == [
+        {"distance_mm": 0, "relative_height_mm": -0.027},
+        {"distance_mm": 0.037, "relative_height_mm": -0.044},
+        {"distance_mm": 0.075, "relative_height_mm": 0.019},
+    ]
+    assert structure_id == "0319aee1"

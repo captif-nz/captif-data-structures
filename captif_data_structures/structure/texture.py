@@ -1,7 +1,7 @@
 
 from datetime import date, datetime, time
 from typing import Any, List, Optional
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, ValidationError
 
 from .base import BaseDataStructure
 from ..helpers import combine_date_time_fields
@@ -52,10 +52,14 @@ class TextureDataStructure(BaseDataStructure):
 
         @validator("date", pre=True)
         def parse_date(cls, value):
-            return datetime.strptime(
-                value,
-                "%d/%m/%Y"
-            ).date()
+            fmt = ["%d/%m/%Y\t%I:%M %p", "%d/%m/%Y"]
+            for ff in fmt:
+                try:
+                    return datetime.strptime(value, ff).date()
+                except:
+                    pass
+            raise ValidationError
+
 
     class row_model(BaseModel):
         """
@@ -158,3 +162,32 @@ class _7cd12dee(TextureDataStructure):
         for ii, _ in enumerate(table_rows):
             table_rows[ii]["distance_mm"] = ii * meta.get("sample_spacing_mm")
         return table_rows
+
+
+class _0319aee1(TextureDataStructure):
+    data_structure = (
+        "Road Name\tCAPTIF\t\n"
+        "Ref Station\t\t\n"
+        "Start Pos (m)\t{}\t\n"
+        "Direction\t{}\t\n"
+        "Wheel Path\t{}\t\n"
+        "Date\t{date}\n"
+        "File No.\t{file_number}\t\n"
+        "Current Pos\t{}\t\n"
+        "*****DATA*****\t\t\n"
+        "Data Point No:\tDistance (mm)\tDepth (mm)\n"
+        "{}"
+        "\n"
+    )
+
+    class row_model(BaseModel):
+        """
+        Table row Pydantic model.
+        """
+        point_no: Any
+        distance_mm: float
+        relative_height_mm: Optional[float]
+
+        @validator("relative_height_mm", pre=True)
+        def parse_relative_height_mm(cls, value):
+            return None if value == "NaN" else value
