@@ -46,16 +46,16 @@ class TextureDataStructure(BaseDataStructure):
         new parameters optional or specify default values.
 
         """
-        date: Optional[date]
+        datetime: Optional[datetime]
         file_number: Optional[int]
         sample_spacing_mm: Optional[float]
 
-        @validator("date", pre=True)
+        @validator("datetime", pre=True)
         def parse_date(cls, value):
             fmt = ["%d/%m/%Y\t%I:%M %p", "%d/%m/%Y"]
             for ff in fmt:
                 try:
-                    return datetime.strptime(value, ff).date()
+                    return datetime.strptime(value, ff)
                 except:
                     pass
             raise ValidationError
@@ -82,7 +82,7 @@ class _4102a5dd(TextureDataStructure):
         "End Pos (m)\t{}\n"
         "Direction\t{}\n"
         "Wheel Path\t{}\n"
-        "Date\t{date}\n"
+        "Date\t{datetime}\n"
         "File No.\t{file_number}\n"
         "Current Pos\t{}\n"
         "*****DATA*****\t\n"
@@ -117,7 +117,7 @@ class _245ff223(TextureDataStructure):
         "End Pos (m)\t{}\t\n"
         "Direction\t{}\t\n"
         "Wheel Path\t{}\t\n"
-        "Date\t{date}\t\n"
+        "Date\t{datetime}\t\n"
         "File No.\t{file_number}\t\n"
         "Current Pos\t{}\t\n"
         "*****DATA*****\t\t\n"
@@ -171,7 +171,7 @@ class _0319aee1(TextureDataStructure):
         "Start Pos (m)\t{}\t\n"
         "Direction\t{}\t\n"
         "Wheel Path\t{}\t\n"
-        "Date\t{date}\n"
+        "Date\t{datetime}\n"
         "File No.\t{file_number}\t\n"
         "Current Pos\t{}\t\n"
         "*****DATA*****\t\t\n"

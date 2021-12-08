@@ -1,5 +1,5 @@
 
-from datetime import date
+from datetime import datetime
 
 from captif_data_structures.readers import TextureReader
 
@@ -9,7 +9,7 @@ def test_texture_reader_4102a5dd(data_path):
     meta, table_rows, structure_id = TextureReader.load(path)
 
     assert meta == {
-        "date": date(2019, 1, 16),
+        "datetime": datetime(2019, 1, 16),
         "file_number": 0,
     }
     assert table_rows == [
@@ -29,7 +29,7 @@ def test_texture_reader_245ff223(data_path):
     meta, table_rows, structure_id = TextureReader.load(path)
 
     assert meta == {
-        "date": date(2021, 9, 29),
+        "datetime": datetime(2021, 9, 29),
         "file_number": 1,
     }
     assert table_rows == [
@@ -59,7 +59,7 @@ def test_texture_reader_0319aee1(data_path):
     meta, table_rows, structure_id = TextureReader.load(path)
 
     assert meta == {
-        "date": date(2021, 10, 22),
+        "datetime": datetime(2021, 10, 22, 8, 16),
         "file_number": 0,
     }
     assert table_rows == [
