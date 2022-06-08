@@ -191,3 +191,46 @@ class _0319aee1(TextureDataStructure):
         @validator("relative_height_mm", pre=True)
         def parse_relative_height_mm(cls, value):
             return None if value == "NaN" else value
+
+
+class _c5084427(TextureDataStructure):
+    data_structure = (
+        "Road Name\t{}\t\n"
+        "Ref Station\t{}\t\n"
+        "Start Pos (m)\t{}\t\n"
+        "Direction\t{}\t\n"
+        "Wheel Path\t{}\t\n"
+        "Date\t{datetime}\n"
+        "File No.\t{file_number}\t\n"
+        "Current Pos\t{}\t\n"
+        "*****DATA*****\t\t\n"
+        "Data Point No:\tDistance (mm)\tDepth (mm)\n"
+        "{}"
+        "\n"
+    )
+    # data_structure = (
+    #     "Road Name\t{}\t\n"
+    #     "Ref Station\t{}\t\n"
+    #     "Start Pos (m)\t{}\t\n"
+    #     "Direction\t{}\t\n"
+    #     "Wheel Path\t{}\t\n"
+    #     "Date\t{datetime}\n"
+    #     "File No.\t{file_number}\t\n"
+    #     "Current Pos\t{}\t\n"
+    #     "*****DATA*****\t\t\n"
+    #     "Data Point No:\tDistance (mm)\tDepth (mm)\n"
+    #     "{}"
+    #     "\n"
+    # )
+
+    class row_model(BaseModel):
+        """
+        Table row Pydantic model.
+        """
+        point_no: Any
+        distance_mm: float
+        relative_height_mm: Optional[float]
+
+        @validator("relative_height_mm", pre=True)
+        def parse_relative_height_mm(cls, value):
+            return None if value == "NaN" else value

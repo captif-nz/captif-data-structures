@@ -68,3 +68,19 @@ def test_texture_reader_0319aee1(data_path):
         {"distance_mm": 0.075, "relative_height_mm": 0.019},
     ]
     assert structure_id == "0319aee1"
+
+
+def test_texture_reader_c5084427(data_path):
+    path = data_path.joinpath("texture", "c5084427.dat")
+    meta, table_rows, structure_id = TextureReader.load(path)
+
+    assert meta == {
+        "datetime": datetime(2022, 6, 8, 10, 50),
+        "file_number": 0,
+    }
+    assert table_rows == [
+        {"distance_mm": 0, "relative_height_mm": 2.538},
+        {"distance_mm": 0.037, "relative_height_mm": 2.554},
+        {"distance_mm": 0.075, "relative_height_mm": 2.535},
+    ]
+    assert structure_id == "c5084427"
